@@ -1,6 +1,7 @@
 import os
 import time
 import re
+import hashlib
 from pathlib import Path
 
 from invoke import task, run
@@ -9,7 +10,7 @@ from invoke.exceptions import UnexpectedExit, CommandTimedOut
 from watchdog.observers import Observer
 from watchdog.events import PatternMatchingEventHandler
 
-TIMEOUT_SEC = 4
+TIMEOUT_SEC = 10
 
 
 def do_test(basedir):
@@ -22,23 +23,35 @@ def do_test(basedir):
         print("input-output pair mismatch\n")
         return
 
+    print(solver)
+
     results = []
 
-    print(solver)
     for i in range(0, len(blocks), 2):
+        # 入力
         feed = blocks[i].strip() + "\n"
-        answer = blocks[i + 1].strip() + "\n"
+
+        if feed.upper().startswith("#SKIP"):
+            # テストケースを飛ばす
+            results.append("SK")
+            continue
+
+        # 解答
+        answer = re.sub(r"^#BLANK",
+                        "",
+                        blocks[i + 1].strip(),
+                        flags=re.IGNORECASE) + "\n"
 
         print(f"==== case {i // 2} ====")
         print(answer.strip())
-        print("--------")
+        print("----------------")
         try:
             # スクリプト実行
             result = run(f"time python {solver} <<EOF\n{feed}EOF\n",
                          timeout=TIMEOUT_SEC)
-            if answer.strip() == "#NOCARE":
+            if answer.strip().upper() == "#DONTCARE":
                 # 解答なしケース
-                results.append("NC")
+                results.append("DC")
             else:
                 # 解答ありケースは stdout と比較
                 results.append("AC" if result.stdout == answer else "WA")
@@ -65,8 +78,18 @@ class AutoTestHandler(PatternMatchingEventHandler):
     def __init__(self, basedir, patterns):
         super().__init__(patterns)
         self.basedir = basedir
+        self.filehash = {}
 
     def on_modified(self, event):
+        # ファイルの内容変更がある場合のみテストを実行する
+        new_stamp = hashlib.sha1(open(event.src_path, "rb").read()).hexdigest()
+        if old_stamp := self.filehash.get(event.src_path):
+            if old_stamp == new_stamp:
+                # 更新無し
+                return
+
+        self.filehash[event.src_path] = new_stamp
+
         msg = f"Modified on {event.src_path}"
         hr = ("=-" * (len(msg) // 2)) + "="
         print(f"\n{hr}\n{msg}\n")
