@@ -1,0 +1,23 @@
+8 6
+
+Alice
+
+1 1
+
+Draw
+
+13 1
+
+Bob
+
+1 13
+
+Alice
+
+13 13
+
+Draw
+
+1 12
+
+Bob
