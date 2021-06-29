@@ -42,7 +42,7 @@ def do_test(basedir):
                         blocks[i + 1].strip(),
                         flags=re.IGNORECASE) + "\n"
 
-        print(f"==== case {i // 2} ====")
+        print(f"==== case {(i // 2) + 1} ====")
         print(answer.strip())
         print("----------------")
         try:
@@ -110,6 +110,7 @@ def work(_, path):
     solver.touch()
     cases.touch()
 
+    # VSCode でファイルを開く
     run(f"code {solver}")
     run(f"code {cases}")
 
