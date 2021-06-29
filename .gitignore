@@ -1,0 +1,7 @@
+.python-version
+
+.vscode/**/*
+!.vscode/*.code-snippets
+
+paiza
+stash
