@@ -4,16 +4,19 @@
         "prefix": "atcbase",
         "body": [
             "def solve():",
+            "    inf = float('inf')",
+            "    mod = 10**9 + 7",
+            "",
             "    N, M = map(int, input().split())",
             "    L = int(input())",
             "    S = input().strip()",
             "    mat = [list(map(int, input().split())) for _ in range(N)]",
             "    vec = [int(input()) for _ in range(N)]",
             "",
-            "    return 0",
+            "    print(0)",
             "",
             "",
-            "print(solve())",
+            "solve()",
         ],
     }
 }
