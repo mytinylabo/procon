@@ -1,3 +1,6 @@
+
+# 整数 nums からいくつか選んで総和を W にできるか判定する
+
 def solve():
     N, W = map(int, input().split())
     nums = [int(input()) for _ in range(N)]
