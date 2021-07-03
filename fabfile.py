@@ -100,7 +100,7 @@ class AutoTestHandler(PatternMatchingEventHandler):
 
 
 @task
-def work(_, path):
+def procon(_, path):
     basedir = Path(path)
     os.makedirs(basedir, exist_ok=True)
 
