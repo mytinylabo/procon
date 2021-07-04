@@ -1,5 +1,4 @@
 import os
-import time
 import re
 import hashlib
 from pathlib import Path
@@ -13,9 +12,9 @@ from watchdog.events import PatternMatchingEventHandler
 TIMEOUT_SEC = 10
 
 
-def do_test(basedir):
-    solver = Path(basedir, "solve.py")
-    cases = Path(basedir, "cases.txt")
+def do_test(basedir, solver_file, cases_file):
+    solver = Path(basedir, solver_file)
+    cases = Path(basedir, cases_file)
 
     # テストケースを読み込む
     blocks = re.split(r"\n{2,}", open(cases, "r").read())
@@ -75,10 +74,11 @@ def do_test(basedir):
 
 
 class AutoTestHandler(PatternMatchingEventHandler):
-    def __init__(self, basedir, patterns):
-        super().__init__(patterns)
+    def __init__(self, basedir, targets):
+        super().__init__(targets)
         self.basedir = basedir
         self.filehash = {}
+        self.targets = targets
 
     def on_modified(self, event):
         # ファイルの内容変更がある場合のみテストを実行する
@@ -94,18 +94,21 @@ class AutoTestHandler(PatternMatchingEventHandler):
         hr = ("=-" * (len(msg) // 2)) + "="
         print(f"\n{hr}\n{msg}\n")
 
-        do_test(self.basedir)
+        do_test(self.basedir, *self.targets)
 
         print(f'Watching "{self.basedir}" ...')
 
 
 @task
-def procon(_, path):
+def procon(_, path, retry=False):
     basedir = Path(path)
     os.makedirs(basedir, exist_ok=True)
 
-    solver = Path(basedir, "solve.py")
-    cases = Path(basedir, "cases.txt")
+    solver_file = "solve.py" if not retry else "solve_retry.py"
+    cases_file = "cases.txt"
+
+    solver = Path(basedir, solver_file)
+    cases = Path(basedir, cases_file)
 
     solver.touch()
     cases.touch()
@@ -114,22 +117,41 @@ def procon(_, path):
     run(f"code {solver}")
     run(f"code {cases}")
 
-    watch(_, path)
+    watch(path, solver_file, cases_file)
 
 
-@task
-def watch(_, path):
+def watch(path, solver_file, cases_file):
     basedir = Path(path)
     observer = Observer()
-    observer.schedule(AutoTestHandler(basedir, ["solve.py", "cases.txt"]),
+    observer.schedule(AutoTestHandler(basedir, [solver_file, cases_file]),
                       basedir)
 
     print(f'Start watching "{basedir}" ...')
     observer.start()
 
+    solver = Path(basedir, solver_file)
+    gencase = Path(basedir, "gencase.py")
+    bigcase = Path(basedir, "bigcase.txt")
+
     try:
-        while True:
-            time.sleep(1)
+        while cmd := input("cmd >> "):
+            try:
+                if cmd == "g":
+                    # テストケース生成スクリプトを実行
+                    gencase.touch()
+                    run(f"python {gencase}", echo=True)
+
+                elif cmd == "b":
+                    # テストケース生成スクリプトを実行し、すぐにソルバに食わせる
+                    # 大規模データのテストに使う想定なので
+                    # bigcase.txt というファイルに生成したケースを保存する
+                    gencase.touch()
+                    run(f"python {gencase}>{bigcase}", echo=True)
+                    run(f"time python {solver}<{bigcase}", echo=True)
+
+            except UnexpectedExit:
+                continue
+
     except KeyboardInterrupt:
         observer.unschedule_all()
         print("Finishing...")
