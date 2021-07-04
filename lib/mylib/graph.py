@@ -1,6 +1,3 @@
-from collections import defaultdict
-
-
 class UnionFind:
     def __init__(self, n):
         self._parents = [-1] * n
@@ -35,7 +32,9 @@ class UnionFind:
         return self._sizes[self.root(x)]
 
     def __repr__(self):
-        bins = defaultdict(set)
+        bins = {}
         for i, p in enumerate(map(self.root, range(len(self._parents)))):
+            if p not in bins:
+                bins[p] = set()
             bins[p].add(i)
         return "<UnionFind> " + str(list(bins.values()))
