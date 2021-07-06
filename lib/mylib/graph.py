@@ -1,3 +1,17 @@
+def adjlist(n, edges, digraph=False):
+    adj = [set() for _ in range(n + 1)]
+
+    if digraph:
+        for s, t in edges:
+            adj[s].add(t)
+    else:
+        for s, t in edges:
+            adj[s].add(t)
+            adj[t].add(s)
+
+    return adj
+
+
 class UnionFind:
     def __init__(self, n):
         self._parents = [-1] * n
@@ -37,4 +51,4 @@ class UnionFind:
             if p not in bins:
                 bins[p] = set()
             bins[p].add(i)
-        return "<UnionFind> " + str(list(bins.values()))
+        return f"UnionFind({', '.join(map(str, bins.values()))})"
