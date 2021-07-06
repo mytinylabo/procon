@@ -1,31 +1,34 @@
 from collections import defaultdict
 
-N, M = map(int, input().split())
-edges = defaultdict(set)
-for _ in range(M):
-    a, b = map(int, input().split())
-    edges[a].add(b)
-    edges[b].add(a)
 
-ps = {(1, (1,))}  # 次に調べるリスト
-completes = set()  # 完走リスト
+def solve():
+    N, M = map(int, input().split())
+    edges = defaultdict(set)
+    for _ in range(M):
+        a, b = map(int, input().split())
+        edges[a].add(b)
+        edges[b].add(a)
 
-while ps:
-    next_ps = set()
-    for node, history in ps:
-        next_nodes = edges[node] - set(history)
-        if next_nodes:
-            # 移動できる
-            for n in next_nodes:
-                # それぞれに移動した場合の履歴を作成して
-                # 次に調べるリストに入れる
-                next_ps.add((n, history + (n,)))
-        else:
-            # 移動できない
-            if len(history) == N:
-                # 履歴に全ノードが入っていたら完走
-                completes.add(history)
+    n_paths = 0
+    seen = [False] * (N + 1)
+    # ノード番号が 1-origin なので 0 は True にしておく
+    seen[0] = True
 
-    ps = next_ps
+    def dfs(node):
+        seen[node] = True
 
-print(len(completes))
+        if all(seen):
+            nonlocal n_paths
+            n_paths += 1
+
+        for next in edges[node]:
+            if not seen[next]:
+                dfs(next)
+
+        seen[node] = False
+
+    dfs(1)
+    print(n_paths)
+
+
+solve()

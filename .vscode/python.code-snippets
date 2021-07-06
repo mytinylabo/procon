@@ -39,14 +39,14 @@
     },
     "AtCoder import: Bisect": {
         "scope": "python",
-        "prefix": "atibisect",
+        "prefix": "iatbisect",
         "body": [
             "from bisect import bisect, bisect_left, insort, insort_left",
         ],
     },
     "AtCoder import: Random": {
         "scope": "python",
-        "prefix": "atirand",
+        "prefix": "iatrand",
         "body": [
             "from random import randint, randrange, sample, choice, choices",
         ],

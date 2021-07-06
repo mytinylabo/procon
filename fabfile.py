@@ -97,6 +97,7 @@ class AutoTestHandler(PatternMatchingEventHandler):
         do_test(self.basedir, *self.targets)
 
         print(f'Watching "{self.basedir}" ...')
+        print("cmd >> ", end="", flush=True)
 
 
 @task
