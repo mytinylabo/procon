@@ -37,11 +37,13 @@ def is_prime(n):
     return True
 
 
-def use_primes(n):
+def use_primes(n, container=list, as_table=False):
     if n <= 3:
         return list(range(2, n + 1))
 
     flags = [True] * (n + 1)
+    flags[0] = False
+    flags[1] = False
 
     for i in [2, 3]:
         for j in range(2, n // i + 1):
@@ -54,7 +56,10 @@ def use_primes(n):
         for j in range(2, n // (i + 2) + 1):
             flags[(i + 2) * j] = False
 
-    return list(filter(lambda x: flags[x], range(2, n + 1)))
+    if as_table:
+        return flags
+    else:
+        return container(filter(lambda x: flags[x], range(2, n + 1)))
 
 
 def use_prime_factors(n):
