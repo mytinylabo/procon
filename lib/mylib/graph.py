@@ -12,6 +12,48 @@ def adjlist(n, edges, digraph=False):
     return adj
 
 
+def adjcost(n, edges, digraph=False):
+    """密グラフ用, cost が二次元リスト
+    """
+    adj = [set() for _ in range(n + 1)]
+
+    inf = float('inf')
+    cost = [[inf] * (n + 1) for _ in range(n + 1)]
+
+    if digraph:
+        for s, t, c in edges:
+            adj[s].add(t)
+            cost[s][t] = c
+    else:
+        for s, t in edges:
+            adj[s].add(t)
+            adj[t].add(s)
+            cost[s][t] = c
+            cost[t][s] = c
+
+    return adj, cost
+
+
+def adjcostd(n, edges, digraph=False):
+    """疎グラフ用, cost が辞書
+    """
+    adj = [set() for _ in range(n + 1)]
+    cost = {}
+
+    if digraph:
+        for s, t, c in edges:
+            adj[s].add(t)
+            cost[s, t] = c
+    else:
+        for s, t in edges:
+            adj[s].add(t)
+            adj[t].add(s)
+            cost[s, t] = c
+            cost[t, s] = c
+
+    return adj, cost
+
+
 class UnionFind:
     def __init__(self, n):
         self._parents = [-1] * n
