@@ -1,11 +1,8 @@
 
 def dptable(dim, value):
-    return [value] * dim
-
-
-def dptable2(dims, value):
-    return [[value] * dims[1] for _ in range(dims[0])]
-
-
-def dptable3(dims, value):
-    return [[[value] * dims[2] for _ in range(dims[1])] for _ in range(dims[0])]
+    if isinstance(dim, int):
+        return [value] * dim
+    elif len(dim) == 2:
+        return [[value] * dim[1] for _ in range(dim[0])]
+    else:
+        return [[[value] * dim[2] for _ in range(dim[1])] for _ in range(dim[0])]

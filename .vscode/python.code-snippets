@@ -48,7 +48,7 @@
         "scope": "python",
         "prefix": "iatrand",
         "body": [
-            "from random import random, randint, randrange, sample, choice, choices",
+            "from random import randint, choices, random, randrange, sample, choice",
         ],
     }
 }

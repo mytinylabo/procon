@@ -33,36 +33,32 @@ def tmap(fn, seq): return tuple(map(fn, seq))
 
 
 def solve():
-    inf = 1 << 60
+    inf = float('inf')
 
     N, M = map(int, input().split())
     E = [tmap(int, input().split()) for _ in range(M)]
+    V = range(1, N + 1)
 
-    adj, cost = adjcost(N, E, directed=True)
+    adj, cost = adjcost(N, E)
 
-    V = list(range(1, N + 1))
-    dp = dptable((N + 1, N + 1, N + 1), inf)
+    dp = dptable((N + 1, N + 1), inf)
+
     for i in V:
         for j in V:
             if i == j:
-                dp[0][i][j] = 0
+                dp[i][j] = 0
             elif j in adj[i]:
-                dp[0][i][j] = cost[i][j]
+                dp[i][j] = cost[i][j]
 
-    result = 0
-    for k in range(N):
+    for k in V:
         for i in V:
-            dpk = dp[k]
-            dpki = dpk[i]
-            dpk1i = dp[k + 1][i]
-            dpkk1 = dpk[k + 1]
+            dpi = dp[i]
             for j in V:
-                a = dpki[j]
-                b = dpki[k + 1] + dpkk1[j]
-                dpk1i[j] = a if a < b else b
-                result += 0 if dpk1i[j] == inf else dpk1i[j]
+                a = dpi[j]
+                b = dpi[k] + dp[k][j]
+                dpi[j] = a if a < b else b
 
-    print(result)
+    print(min([max(dp[i][1:]) for i in V]))
 
 
 solve()

@@ -1,5 +1,4 @@
-import sys
-from math import pi, sqrt, sin, cos, atan2, degrees
+from math import pi, sqrt, sin, cos, atan2, degrees, isclose
 
 
 def solve():
@@ -22,7 +21,7 @@ def solve():
     for e in E:
         y, z = pos(e)
         d = dist(0, y)
-        if d <= sys.float_info.epsilon:
+        if isclose(0, d):
             print(90.0)
         else:
             a = atan2(abs(z), d)

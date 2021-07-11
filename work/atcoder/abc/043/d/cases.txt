@@ -1,0 +1,19 @@
+needed
+
+2 5
+
+atcoder
+
+-1 -1
+
+sdfasoiudfousidfvjskdfnaosfsiodsd
+
+26 28
+
+abcabcabcabcabcb
+
+14 16
+
+abcabcabcabcabcc
+
+15 16

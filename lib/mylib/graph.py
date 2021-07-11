@@ -1,7 +1,7 @@
-def adjlist(n, edges, digraph=False):
+def adjlist(n, edges, directed=False):
     adj = [set() for _ in range(n + 1)]
 
-    if digraph:
+    if directed:
         for s, t in edges:
             adj[s].add(t)
     else:
@@ -12,7 +12,7 @@ def adjlist(n, edges, digraph=False):
     return adj
 
 
-def adjcost(n, edges, digraph=False):
+def adjcost(n, edges, directed=False):
     """密グラフ用, cost が二次元リスト
     """
     adj = [set() for _ in range(n + 1)]
@@ -20,12 +20,12 @@ def adjcost(n, edges, digraph=False):
     inf = float('inf')
     cost = [[inf] * (n + 1) for _ in range(n + 1)]
 
-    if digraph:
+    if directed:
         for s, t, c in edges:
             adj[s].add(t)
             cost[s][t] = c
     else:
-        for s, t in edges:
+        for s, t, c in edges:
             adj[s].add(t)
             adj[t].add(s)
             cost[s][t] = c
@@ -34,13 +34,13 @@ def adjcost(n, edges, digraph=False):
     return adj, cost
 
 
-def adjcostd(n, edges, digraph=False):
+def adjcostd(n, edges, directed=False):
     """疎グラフ用, cost が辞書
     """
     adj = [set() for _ in range(n + 1)]
     cost = {}
 
-    if digraph:
+    if directed:
         for s, t, c in edges:
             adj[s].add(t)
             cost[s, t] = c
@@ -54,10 +54,35 @@ def adjcostd(n, edges, digraph=False):
     return adj, cost
 
 
+def tpsort(N, adj, origin=0):
+    """トポロジカルソート
+       N が大きい時は sys.setrecursionlimit で
+       再帰の上限を増やしておくこと。
+    """
+    seen = [False] * (N + 1)
+    order = []
+
+    def dfs(v):
+        seen[v] = True
+        for t in adj[v]:
+            if not seen[t]:
+                dfs(t)
+        order.append(v)
+
+    vs = range(N) if origin == 0 else range(1, N + 1)
+    for v in vs:
+        if not seen[v]:
+            dfs(v)
+
+    order.reverse()
+    return order
+
+
 class UnionFind:
     def __init__(self, n):
-        self._parents = [-1] * n
-        self._sizes = [1] * n
+        # 0/1-origin 両対応のため n + 1 で確保する
+        self._parents = [-1] * (n + 1)
+        self._sizes = [1] * (n + 1)
 
     def root(self, x):
         if self._parents[x] == -1:
