@@ -1,3 +1,4 @@
+
 def adjlist(n, edges, directed=False):
     adj = [set() for _ in range(n + 1)]
 

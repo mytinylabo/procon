@@ -1,0 +1,19 @@
+4 5
+
+Possible
+
+1 1
+
+Impossible
+
+2 3
+
+Possible
+
+6 6
+
+Possible
+
+6 5
+
+Possible

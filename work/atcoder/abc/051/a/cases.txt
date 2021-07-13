@@ -1,0 +1,11 @@
+happy,newyear,enjoy
+
+happy newyear enjoy
+
+haiku,atcoder,tasks
+
+haiku atcoder tasks
+
+abcde,fghihgf,edcba
+
+abcde fghihgf edcba

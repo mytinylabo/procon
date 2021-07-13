@@ -1,5 +1,5 @@
 
-def use_factorials(n, p):
+def factorials(n, p):
     """法 p における 0! .. n! と
        その逆元のテーブルを生成する。
        p は素数であること。
@@ -37,7 +37,7 @@ def is_prime(n):
     return True
 
 
-def use_primes(n, container=list, as_table=False):
+def primes(n, container=list, as_table=False):
     if n <= 3:
         return list(range(2, n + 1))
 
@@ -62,7 +62,10 @@ def use_primes(n, container=list, as_table=False):
         return container(filter(lambda x: flags[x], range(2, n + 1)))
 
 
-def use_prime_factors(n):
+def prime_factors(n):
+    if n <= 1:
+        return []
+
     factors = []
 
     while n % 2 == 0:

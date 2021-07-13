@@ -30,8 +30,13 @@ def do_test(basedir, solver_file, cases_file):
         # 入力
         feed = blocks[i].strip() + "\n"
 
-        if feed.upper().startswith("#SKIP"):
-            # テストケースを飛ばす
+        if feed.upper().startswith("#SKIPBELOW"):
+            # 後続のテストケースをすべて飛ばす
+            results.append("SK")
+            break
+
+        elif feed.upper().startswith("#SKIP"):
+            # このテストケースを飛ばす
             results.append("SK")
             continue
 

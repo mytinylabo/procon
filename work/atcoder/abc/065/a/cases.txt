@@ -1,0 +1,55 @@
+4 3 6
+
+safe
+
+6 5 1
+
+delicious
+
+3 7 12
+
+dangerous
+
+5 5 5
+
+delicious
+
+5 5 6
+
+safe
+
+5 5 10
+
+safe
+
+5 5 11
+
+dangerous
+
+3 3 1
+
+delicious
+
+3 3 2
+
+delicious
+
+3 3 3
+
+delicious
+
+3 3 4
+
+safe
+
+3 3 5
+
+safe
+
+3 3 6
+
+safe
+
+3 3 7
+
+dangerous
