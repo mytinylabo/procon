@@ -39,6 +39,7 @@ def is_prime(n):
 
 def primes(n, container=list, as_table=False):
     if n <= 3:
+        # TODO: container, as_table 対応
         return list(range(2, n + 1))
 
     flags = [True] * (n + 1)
@@ -89,3 +90,16 @@ def prime_factors(n):
         factors.append(n)
 
     return factors
+
+
+def divisors(n):
+    low = []
+    high = []
+
+    for i in range(1, int(n**0.5) + 1):
+        if n % i == 0:
+            low.append(i)
+            if i != n // i:
+                high.append(n // i)
+
+    return low + high[::-1]
