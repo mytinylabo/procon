@@ -1,5 +1,5 @@
 
-def dptable(dim, value):
+def array(dim, value):
     if isinstance(dim, int):
         return [value] * dim
     elif len(dim) == 2:

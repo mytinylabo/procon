@@ -45,6 +45,20 @@
             "from bisect import bisect, bisect_left, insort, insort_left",
         ],
     },
+    "AtCoder import: Queue": {
+        "scope": "python",
+        "prefix": "iatqeueu",
+        "body": [
+            "from collections import deque",
+        ],
+    },
+    "AtCoder import: Heap queue": {
+        "scope": "python",
+        "prefix": "iatheapq",
+        "body": [
+            "from heapq import heappush, heappop",
+        ],
+    },
     "AtCoder import: Random": {
         "scope": "python",
         "prefix": "iatrand",
