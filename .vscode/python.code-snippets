@@ -3,6 +3,8 @@
         "scope": "python",
         "prefix": "atbase",
         "body": [
+            "from collections import defaultdict",
+            "",
             "def lmap(fn, seq): return list(map(fn, seq))",
             "def tmap(fn, seq): return tuple(map(fn, seq))",
             "def lfilter(fn, seq): return list(filter(fn, seq))",
@@ -19,7 +21,6 @@
             "    vec = [int(input()) for _ in range(N)]",
             "",
             "    print(0)",
-            "",
             "",
             "solve()",
         ],
