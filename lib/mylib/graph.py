@@ -59,6 +59,24 @@ def tpsort(n, adj, origin=0):
     return order
 
 
+def ssspbfs(n, s, adj):
+    """BFS による単一始点最短経路
+    """
+    from collections import deque
+    inf = float('inf')
+
+    dist = [inf] * (n + 1)
+    dist[s] = 0
+    todo = deque([s])
+    while todo:
+        v = todo.pop()
+        for t in adj[v]:
+            if dist[v] + 1 < dist[t]:
+                dist[t] = dist[v] + 1
+                todo.appendleft(t)
+    return dist
+
+
 class UnionFind:
     def __init__(self, n):
         # 0/1-indexed 両対応のため n + 1 で確保する
