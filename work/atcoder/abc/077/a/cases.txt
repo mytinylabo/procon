@@ -1,0 +1,14 @@
+pot
+top
+
+YES
+
+tab
+bet
+
+NO
+
+eye
+eel
+
+NO

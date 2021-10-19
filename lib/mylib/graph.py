@@ -60,7 +60,7 @@ def tpsort(n, adj, origin=0):
 
 
 def ssspbfs(n, s, adj):
-    """BFS による単一始点最短経路
+    """BFS による単一始点最短路
     """
     from collections import deque
     inf = float('inf')
