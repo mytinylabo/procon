@@ -213,13 +213,19 @@ def watch(path, solver_file, cases_file, language_config):
                         echo=True,
                     )
 
+                elif cmd == "q":
+                    # 終了
+                    break
+
             except UnexpectedExit:
                 continue
 
     except KeyboardInterrupt:
-        observer.unschedule_all()
-        print("Finishing...")
-        observer.stop()
+        pass
 
-    observer.join()
-    print("Done.")
+    finally:
+        print("Finishing...")
+        observer.unschedule_all()
+        observer.stop()
+        observer.join()
+        print("Done.")
