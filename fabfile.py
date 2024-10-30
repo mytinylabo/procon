@@ -1,6 +1,7 @@
 import os
 import re
 import hashlib
+import yaml
 from pathlib import Path
 
 from invoke import task, run
@@ -10,9 +11,35 @@ from watchdog.observers import Observer
 from watchdog.events import PatternMatchingEventHandler
 
 TIMEOUT_SEC = 10
+LANGUAGE_CONFIG_DIR = "language"
 
 
-def do_test(basedir, solver_file, cases_file):
+def load_global_config():
+    config_path = Path("global.yml")
+    if not config_path.exists():
+        raise FileNotFoundError("Global configuration file 'global.yml' not found.")
+    with open(config_path, "r") as f:
+        return yaml.safe_load(f)
+
+
+def load_language_config(language):
+    config_path = Path(LANGUAGE_CONFIG_DIR, f"{language}.yml")
+    if not config_path.exists():
+        raise FileNotFoundError(
+            f"Configuration file for language '{language}' not found."
+        )
+    with open(config_path, "r") as f:
+        config = yaml.safe_load(f)
+
+    return config
+
+
+def do_test(
+    basedir,
+    language_config,
+    solver_file,
+    cases_file,
+):
     solver = Path(basedir, solver_file)
     cases = Path(basedir, cases_file)
 
@@ -26,11 +53,22 @@ def do_test(basedir, solver_file, cases_file):
 
     results = []
 
+    # PICK ケースがあるか調べる
+    pick = False
+    for i in range(0, len(blocks), 2):
+        feed = blocks[i].strip() + "\n"
+        pick = pick or feed.upper().startswith("#PICK")
+
     for i in range(0, len(blocks), 2):
         # 入力
         feed = blocks[i].strip() + "\n"
 
-        if feed.upper().startswith("#SKIPBELOW"):
+        if pick and not feed.upper().startswith("#PICK"):
+            # PICK が指定されたケース以外は飛ばす
+            results.append("SK")
+            continue
+
+        elif feed.upper().startswith("#SKIPBELOW"):
             # 後続のテストケースをすべて飛ばす
             results.append("SK")
             break
@@ -40,19 +78,23 @@ def do_test(basedir, solver_file, cases_file):
             results.append("SK")
             continue
 
+        if pick:
+            feed = re.sub(r"^#PICK\n", "", feed, flags=re.IGNORECASE | re.MULTILINE)
+
         # 解答
-        answer = re.sub(r"^#BLANK",
-                        "",
-                        blocks[i + 1].strip(),
-                        flags=re.IGNORECASE) + "\n"
+        answer = (
+            re.sub(r"^#BLANK", "", blocks[i + 1].strip(), flags=re.IGNORECASE) + "\n"
+        )
 
         print(f"==== case {(i // 2) + 1} ====")
         print(answer.strip())
         print("----------------")
         try:
             # スクリプト実行
-            result = run(f"time python {solver} <<EOF\n{feed}EOF\n",
-                         timeout=TIMEOUT_SEC)
+            cmd = (language_config["command"] + " <<EOF\n{feed}EOF\n").format(
+                solver=solver, feed=feed
+            )
+            result = run(cmd, timeout=TIMEOUT_SEC)
             if answer.strip().upper() == "#DONTCARE":
                 # 解答なしケース
                 results.append("DC")
@@ -61,7 +103,7 @@ def do_test(basedir, solver_file, cases_file):
                 results.append("AC" if result.stdout == answer else "WA")
 
         except UnexpectedExit:
-            # solve.py の実行時エラーのとき
+            # solver の実行時エラーのとき
             # Invoke 側のスタックトレースを省くための握り潰し。
             # 他の異常終了も潰しそうだけど困った時に考える
             break
@@ -79,10 +121,11 @@ def do_test(basedir, solver_file, cases_file):
 
 
 class AutoTestHandler(PatternMatchingEventHandler):
-    def __init__(self, basedir, targets):
+    def __init__(self, basedir, language_config, targets):
         super().__init__(targets)
         self.basedir = basedir
         self.filehash = {}
+        self.language_config = language_config
         self.targets = targets
 
     def on_modified(self, event):
@@ -99,18 +142,25 @@ class AutoTestHandler(PatternMatchingEventHandler):
         hr = ("=-" * (len(msg) // 2)) + "="
         print(f"\n{hr}\n{msg}\n")
 
-        do_test(self.basedir, *self.targets)
+        do_test(self.basedir, self.language_config, *self.targets)
 
         print(f'Watching "{self.basedir}" ...')
         print("cmd >> ", end="", flush=True)
 
 
 @task
-def procon(_, path, retry=False):
+def procon(_, language, path, retry=False):
     basedir = Path(path)
     os.makedirs(basedir, exist_ok=True)
 
-    solver_file = "solve.py" if not retry else "solve_retry.py"
+    language_config = load_language_config(language)
+    global_config = load_global_config()
+
+    solver_file = (
+        language_config["solver_file"]
+        if not retry
+        else language_config["solver_retry_file"]
+    )
     cases_file = "cases.txt"
 
     solver = Path(basedir, solver_file)
@@ -120,17 +170,19 @@ def procon(_, path, retry=False):
     cases.touch()
 
     # VSCode でファイルを開く
-    run(f"code {solver}")
-    run(f"code {cases}")
+    if global_config.get("open_in_vscode", False):
+        run(f"code {solver}")
+        run(f"code {cases}")
 
-    watch(path, solver_file, cases_file)
+    watch(path, solver_file, cases_file, language_config)
 
 
-def watch(path, solver_file, cases_file):
+def watch(path, solver_file, cases_file, language_config):
     basedir = Path(path)
     observer = Observer()
-    observer.schedule(AutoTestHandler(basedir, [solver_file, cases_file]),
-                      basedir)
+    observer.schedule(
+        AutoTestHandler(basedir, language_config, [solver_file, cases_file]), basedir
+    )
 
     print(f'Start watching "{basedir}" ...')
     observer.start()
@@ -144,6 +196,7 @@ def watch(path, solver_file, cases_file):
             try:
                 if cmd == "g":
                     # テストケース生成スクリプトを実行
+                    # 出力を cases.txt に手動でコピーする想定
                     gencase.touch()
                     run(f"python {gencase}", echo=True)
 
@@ -152,8 +205,13 @@ def watch(path, solver_file, cases_file):
                     # 大規模データのテストに使う想定なので
                     # bigcase.txt というファイルに生成したケースを保存する
                     gencase.touch()
-                    run(f"python {gencase}>{bigcase}", echo=True)
-                    run(f"time python {solver}<{bigcase}", echo=True)
+                    run(f"python {gencase} >{bigcase}", echo=True)
+                    run(
+                        (language_config["command"] + f" <{bigcase}").format(
+                            solver=solver
+                        ),
+                        echo=True,
+                    )
 
             except UnexpectedExit:
                 continue

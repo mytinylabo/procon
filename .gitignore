@@ -6,5 +6,6 @@
 
 paiza
 stash
+*.out
 
 bigcase.txt
